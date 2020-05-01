@@ -5,6 +5,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const webpack = require("webpack");
+
 module.exports = (env, options) => {
   const devMode = options.mode !== 'production';
 
@@ -40,12 +42,23 @@ module.exports = (env, options) => {
             'css-loader',
             'sass-loader',
           ],
+        },
+        // janus.js does not use 'export' to provide its functionality to others, instead
+        // it creates a global variable called 'Janus' and expects consumers to use it.
+        // Let's use 'exports-loader' to simulate it uses 'export'.
+        {
+          test: require.resolve('janus-gateway'),
+          use: 'exports-loader?Janus=Janus'
         }
       ]
     },
     plugins: [
       new MiniCssExtractPlugin({ filename: '../css/app.css' }),
-      new CopyWebpackPlugin([{ from: 'static/', to: '../' }])
+      new CopyWebpackPlugin([{ from: 'static/', to: '../' }]),
+      // janus.js does not use 'import' to access to the functionality of webrtc-adapter,
+      // instead it expects a global object called 'adapter' for that.
+      // Let's make that object available.
+      new webpack.ProvidePlugin({ adapter: "webrtc-adapter" }),
     ]
   }
 };

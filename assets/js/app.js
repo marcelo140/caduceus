@@ -13,3 +13,25 @@ import "../css/app.scss"
 //     import socket from "./socket"
 //
 import "phoenix_html"
+
+// Webpack + Janus client
+import _ from 'lodash';
+import { Janus } from 'janus-gateway';
+
+function component() {
+    const element = document.createElement('div');
+  
+    element.innerHTML = _.join(['Hello', '85'], ' ');
+
+    Janus.init({
+        debug: true,
+        dependencies: Janus.useDefaultDependencies(), // or: Janus.useOldDependencies() to get the behaviour of previous Janus versions
+        callback: function() {
+            console.log("85 deus")
+        }
+    });
+  
+    return element;
+  }
+  
+  document.body.appendChild(component());

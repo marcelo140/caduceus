@@ -20,13 +20,15 @@ import { Janus } from "janus-gateway";
 
 const SERVER = "http://localhost:8088/janus";
 
+var echotest = null;
+
 function component() {
     const element = document.createElement("div");
 
     element.innerHTML = _.join(["Hello", "85"], " ");
 
     Janus.init({
-        debug: true,
+        // debug: true,
         dependencies: Janus.useDefaultDependencies(), // or: Janus.useOldDependencies() to get the behaviour of previous Janus versions
         callback: () => console.log("85 deus"),
     });
@@ -40,9 +42,29 @@ function component() {
 
             janus.attach({
                 plugin: "janus.plugin.echotest",
-                success: (pluginHandle) => {
+                success: (handle) => {
                     // Plugin attached! 'pluginHandle' is our handle
-                    console.log("plugin handle success")
+                    console.log("plugin handle success");
+
+                    echotest = handle;
+
+                    var body = { audio: true, video: true };
+                    echotest.send({ message: body });
+
+                    echotest.createOffer({
+                        media: { data: true }, // Let's negotiate data channels as well
+                        success: (jsep) => {
+                            Janus.debug("Got SDP!");
+                            Janus.debug(jsep);
+                            echotest.send({ message: body, jsep: jsep });
+                            
+                            sendTextMessage(echotest, "shit");
+                        },
+                        error: (error) => {
+                            Janus.error("WebRTC error:", error);
+                            bootbox.alert("WebRTC error... " + JSON.stringify(error));
+                        },
+                    });
                 },
                 error: (cause) => {
                     // Couldn't attach to the plugin
@@ -50,15 +72,28 @@ function component() {
                 consentDialog: (on) => {
                     // e.g., Darken the screen if on=true (getUserMedia incoming), restore it otherwise
                 },
+                ondata: (data) => {
+                    console.log(`Message: ${data}`)
+                    Janus.debug(`We got data from the DataChannel! ${data}`);
+                },
+                ondataopen: () => {
+                    console.log("Data channel open")
+                },
                 onmessage: (msg, jsep) => {
-                    // We got a message/event (msg) from the plugin
-                    // If jsep is not null, this involves a WebRTC negotiation
+                    console.log(msg)
+                    // Handle msg, if needed, and check jsep
+                    if (jsep !== undefined && jsep !== null) {
+                        // We have the ANSWER from the plugin
+                        echotest.handleRemoteJsep({ jsep: jsep });
+                    }
                 },
                 onlocalstream: (stream) => {
-                    // We have a local stream (getUserMedia worked!) to display
+                    // Invoked after createOffer
+                    // This is our video
                 },
                 onremotestream: (stream) => {
-                    // We have a remote stream (working PeerConnection!) to display
+                    // Invoked after handleRemoteJsep has got us a PeerConnection
+                    // This is the remote video
                 },
                 oncleanup: () => {
                     // PeerConnection with the plugin closed, clean the UI
@@ -81,6 +116,19 @@ function component() {
     });
 
     return element;
+}
+
+const sendTextMessage = (echotest, message) => {
+    echotest.data({
+        text: message,
+        error: (reason) => {
+            console.log("message not sent")
+            console.log(reason);
+        },
+        success: () => {
+            console.log(`sent message ${message}`);
+        },
+    });
 }
 
 document.body.appendChild(component());

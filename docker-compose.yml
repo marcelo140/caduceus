@@ -2,7 +2,7 @@ version: '2'
 
 services:
   janus-gateway:
-    image: linagora/janus-gateway
+    image: codezed/janus-webrtc-gateway-docker
     ports:
       - "80:80"
       - "7088:7088"

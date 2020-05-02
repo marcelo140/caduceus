@@ -59,7 +59,7 @@ function component() {
                     echotest.send({ message: body });
 
                     echotest.createOffer({
-                        // media: { data: true }, // Let's negotiate data channels as well
+                        media: { data: true }, // Let's negotiate data channels as well
                         success: (jsep) => {
                             Janus.debug("Got SDP!");
                             Janus.debug(jsep);

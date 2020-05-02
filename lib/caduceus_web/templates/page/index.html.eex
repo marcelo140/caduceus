@@ -1,5 +1,5 @@
 <section class="phx-hero">
-  <video id="local_video" width=315 height=235 autoplay playsinline> </video>
-  <video id="remote_video" width=315 height=235 autoplay playsinline> </video>
-  <video id="remote_video_1" width=315 height=235 autoplay playsinline> </video>
+  <video id="local_video" width=320 height=240 autoplay playsinline> </video>
+  <video id="remote_video_1" width=320 height=240 autoplay playsinline> </video>
+  <video id="remote_video_2" width=320 height=240 autoplay playsinline> </video>
 </section>

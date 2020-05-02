@@ -23,12 +23,18 @@ const SERVER = "http://localhost:8088/janus";
 var echotest = null;
 
 function component() {
-    const element = document.createElement("div");
 
+    const element = document.createElement("div");
     element.innerHTML = _.join(["Hello", "85"], " ");
 
+    const local_video = document.getElementById("local_video");
+    const remote_video = document.getElementById("remote_video");
+
+    console.log(local_video.id)
+    console.log(remote_video.id)
+
     Janus.init({
-        // debug: true,
+        debug: true,
         dependencies: Janus.useDefaultDependencies(), // or: Janus.useOldDependencies() to get the behaviour of previous Janus versions
         callback: () => console.log("85 deus"),
     });
@@ -42,6 +48,7 @@ function component() {
 
             janus.attach({
                 plugin: "janus.plugin.echotest",
+                opaqueId: "dinis",
                 success: (handle) => {
                     // Plugin attached! 'pluginHandle' is our handle
                     console.log("plugin handle success");
@@ -52,17 +59,17 @@ function component() {
                     echotest.send({ message: body });
 
                     echotest.createOffer({
-                        media: { data: true }, // Let's negotiate data channels as well
+                        // media: { data: true }, // Let's negotiate data channels as well
                         success: (jsep) => {
                             Janus.debug("Got SDP!");
                             Janus.debug(jsep);
                             echotest.send({ message: body, jsep: jsep });
-                            
-                            sendTextMessage(echotest, "shit");
                         },
                         error: (error) => {
                             Janus.error("WebRTC error:", error);
-                            bootbox.alert("WebRTC error... " + JSON.stringify(error));
+                            bootbox.alert(
+                                "WebRTC error... " + JSON.stringify(error)
+                            );
                         },
                     });
                 },
@@ -73,14 +80,17 @@ function component() {
                     // e.g., Darken the screen if on=true (getUserMedia incoming), restore it otherwise
                 },
                 ondata: (data) => {
-                    console.log(`Message: ${data}`)
+                    console.log(`Message: ${data}`);
                     Janus.debug(`We got data from the DataChannel! ${data}`);
                 },
                 ondataopen: () => {
-                    console.log("Data channel open")
+                    console.log("Data channel open");
                 },
                 onmessage: (msg, jsep) => {
-                    console.log(msg)
+                    console.log(msg);
+
+                    sendTextMessage(echotest, "shit");
+
                     // Handle msg, if needed, and check jsep
                     if (jsep !== undefined && jsep !== null) {
                         // We have the ANSWER from the plugin
@@ -88,12 +98,12 @@ function component() {
                     }
                 },
                 onlocalstream: (stream) => {
+                    Janus.attachMediaStream(local_video, stream);
                     // Invoked after createOffer
                     // This is our video
                 },
                 onremotestream: (stream) => {
-                    // Invoked after handleRemoteJsep has got us a PeerConnection
-                    // This is the remote video
+                    Janus.attachMediaStream(remote_video, stream);
                 },
                 oncleanup: () => {
                     // PeerConnection with the plugin closed, clean the UI
@@ -122,13 +132,13 @@ const sendTextMessage = (echotest, message) => {
     echotest.data({
         text: message,
         error: (reason) => {
-            console.log("message not sent")
+            console.log("message not sent");
             console.log(reason);
         },
         success: () => {
             console.log(`sent message ${message}`);
         },
     });
-}
+};
 
 document.body.appendChild(component());

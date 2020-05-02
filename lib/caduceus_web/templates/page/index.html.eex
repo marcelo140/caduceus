@@ -35,4 +35,6 @@
       </li>
     </ul>
   </article>
+  <video id="local_video" width=320 height=240 autoplay playsinline> </video>
+  <video id="remote_video" width=320 height=240 autoplay playsinline> </video>
 </section>

@@ -17,13 +17,20 @@ h5{font-size: 1.6rem; letter-spacing: 0; line-height: 1.4}
 h6{font-size: 1.4rem; letter-spacing: 0; line-height: 1.2}
 pre{padding: 1em;}
 
-.container{
-  margin: 0 auto;
+.container_2{
+  margin: -15px auto;
   max-width: 80.0rem;
   padding: 0 2.0rem;
   position: relative;
   width: 100%
 }
+.container{
+    margin: 0 auto;
+    max-width: 110.0rem;
+    padding: 0 2.0rem;
+    position: relative;
+    width: 100%
+  }
 select {
   width: auto;
 }
@@ -35,7 +42,7 @@ select {
   background: #eee;
   border-radius: 6px;
   padding: 3em 3em 1em;
-  margin-bottom: 3rem;
+  margin-bottom: 0rem;
   font-weight: 200;
   font-size: 120%;
 }
@@ -55,13 +62,17 @@ select {
   margin-right: 19rem;
   margin-bottom: -1rem;
 }
+.new_button {
+  position: absolute;
+  margin-left: -12rem;
+}
 
 /* Headers */
 header {
   width: 100%;
   background: #fdfdfd;
   border-bottom: 1px solid #eaeaea;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 header section {
   align-items: center;

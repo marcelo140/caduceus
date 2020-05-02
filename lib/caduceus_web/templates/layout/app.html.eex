@@ -10,9 +10,10 @@
   </head>
   <body>
     <header>
-      <section class="container">
-        <h1 class="new_title">
-            <b>Welcome to Caduceus!<b>
+      <section class="container_2">
+        <h1>
+            <b class="new_title">Welcome to Caduceus!</b>
+            <button class="new_button" id="start_call" onclick="start_call()">Start Call</button>
         </h1>
         <a href="https://en.wikipedia.org/wiki/Caduceus" class="phx-logo">
           <img src="<%= Routes.static_path(@conn, "/images/caduceus.png") %>"

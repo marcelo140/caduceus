@@ -1,17 +1,29 @@
 version: '2'
 
 services:
-  janus-gateway:
+  caduceus:
+    build:
+      context: .
+    depends_on:
+      - postgres
+      - janus
+    ports:
+      - 4000:4000
+    environment:
+      JANUS_HOST: janus
+      DATABASE_URL: ecto://postgres:postgres@postgres/caduceus
+      SECRET_KEY_BASE: T0CzlbP1PgM2zDie6BKxAK/COtwXALoxJkqdRCsDLwupyil0DJVgW5RXESJiSsdU
+    command: >
+      bash -c 'mix ecto.setup && _build/prod/rel/caduceus/bin/caduceus start'
+
+  janus:
     image: codezed/janus-webrtc-gateway-docker
     ports:
-      - "80:80"
-      - "7088:7088"
       - "8088:8088"
       - "8188:8188"
       - "8089:8089"
       - "10000-10200:10000-10200/udp"
-    environment:
-      - DOCKER_IP=${DOCKER_IP}
+
   postgres:
     image: postgres
     ports:

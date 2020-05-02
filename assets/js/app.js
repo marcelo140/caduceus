@@ -1,21 +1,9 @@
-// We need to import the CSS so that webpack will load it.
-// The MiniCssExtractPlugin is used to separate it out into
-// its own CSS file.
 import "../css/app.scss";
-
-// webpack automatically bundles all modules in your
-// entry points. Those entry points can be configured
-// in "webpack.config.js".
-//
-// Import deps with the dep name or local files with a relative path, for example:
-//
-//     import {Socket} from "phoenix"
-//     import socket from "./socket"
-//
 import "phoenix_html";
+import _ from "lodash";
 
 // Webpack + Janus client
-import _ from "lodash";
+
 import { Janus } from "janus-gateway";
 
 const SERVER = "http://localhost:8088/janus";
@@ -23,19 +11,21 @@ const SERVER = "http://localhost:8088/janus";
 var echotest = null;
 
 function component() {
+    return document.createElement("div");
+}
 
-    const element = document.createElement("div");
-
+window.start_call = function() {
     const local_video = document.getElementById("local_video");
     const remote_video = document.getElementById("remote_video");
+    const remote_video_1 = document.getElementById("remote_video_1");
 
     console.log(local_video.id)
     console.log(remote_video.id)
 
     Janus.init({
         debug: true,
-        dependencies: Janus.useDefaultDependencies(), // or: Janus.useOldDependencies() to get the behaviour of previous Janus versions
-        callback: () => console.log("85 deus"),
+        dependencies: Janus.useDefaultDependencies(),
+        callback: () => console.log("85 é lixo .l."),
     });
 
     var janus = new Janus({
@@ -103,6 +93,7 @@ function component() {
                 },
                 onremotestream: (stream) => {
                     Janus.attachMediaStream(remote_video, stream);
+                    Janus.attachMediaStream(remote_video_1, stream);
                 },
                 oncleanup: () => {
                     // PeerConnection with the plugin closed, clean the UI
@@ -124,7 +115,7 @@ function component() {
         },
     });
 
-    return element;
+    document.getElementById('start_call').remove()
 }
 
 const sendTextMessage = (echotest, message) => {

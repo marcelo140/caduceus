@@ -18,19 +18,28 @@ import "phoenix_html";
 import _ from "lodash";
 import { Janus } from "janus-gateway";
 
+const DEFAULT_ROOM = 1234;
+const USERNAME = "dinis";
 const SERVER = "http://localhost:8088/janus";
 
-var echotest = null;
+var my_id;
+var my_private_id;
+
+var janus = null;
+var videoroom_handle = null;
+
+var remote_streams = []
 
 function component() {
-
     const element = document.createElement("div");
 
     const local_video = document.getElementById("local_video");
-    const remote_video = document.getElementById("remote_video");
+    const remote_video_1 = document.getElementById("remote_video_1");
+    const remote_video_2 = document.getElementById("remote_video_2");
 
-    console.log(local_video.id)
-    console.log(remote_video.id)
+    console.log(local_video.id);
+    console.log(remote_video_1.id);
+    console.log(remote_video_2.id);
 
     Janus.init({
         debug: true,
@@ -38,39 +47,22 @@ function component() {
         callback: () => console.log("85 deus"),
     });
 
-    var janus = new Janus({
+    janus = new Janus({
         server: SERVER,
         success: () => {
-            // Done! attach to plugin XYZ
             console.log("success");
             console.log(janus.isConnected());
 
             janus.attach({
-                plugin: "janus.plugin.echotest",
+                plugin: "janus.plugin.videoroom",
                 opaqueId: "dinis",
                 success: (handle) => {
-                    // Plugin attached! 'pluginHandle' is our handle
-                    console.log("plugin handle success");
+                    console.log("master plugin handle success");
 
-                    echotest = handle;
+                    videoroom_handle = handle;
 
-                    var body = { audio: true, video: true };
-                    echotest.send({ message: body });
-
-                    echotest.createOffer({
-                        media: { data: true }, // Let's negotiate data channels as well
-                        success: (jsep) => {
-                            Janus.debug("Got SDP!");
-                            Janus.debug(jsep);
-                            echotest.send({ message: body, jsep: jsep });
-                        },
-                        error: (error) => {
-                            Janus.error("WebRTC error:", error);
-                            bootbox.alert(
-                                "WebRTC error... " + JSON.stringify(error)
-                            );
-                        },
-                    });
+                    // Joining room
+                    joinRoom(videoroom_handle);
                 },
                 error: (cause) => {
                     // Couldn't attach to the plugin
@@ -88,12 +80,36 @@ function component() {
                 onmessage: (msg, jsep) => {
                     console.log(msg);
 
-                    sendTextMessage(echotest, "shit");
+                    const room = msg["room"];
+                    const event_type = msg["videoroom"];
+                    const publishers = msg["publishers"];
+
+                    if (event_type === "joined") {
+                        console.log(`Joined room ${room}...`);
+
+                        my_id = msg["id"];
+                        my_private_id = msg["private_id"];
+
+                        joinAndConfigure(videoroom_handle)
+                        
+                    }
+                    
+                    if (event_type === "joined" || event_type === "event"){
+                        if (publishers !== undefined && publishers !== null) {
+                            console.log("Publishers!!")
+    
+                            for(var publisher in publishers){
+                                console.log(`${JSON.stringify(publisher)}`);
+    
+                                addNewPublisher(publisher, remote_video_1);
+                            }
+                        }
+                    } 
 
                     // Handle msg, if needed, and check jsep
                     if (jsep !== undefined && jsep !== null) {
                         // We have the ANSWER from the plugin
-                        echotest.handleRemoteJsep({ jsep: jsep });
+                        videoroom_handle.handleRemoteJsep({ jsep: jsep });
                     }
                 },
                 onlocalstream: (stream) => {
@@ -102,7 +118,8 @@ function component() {
                     // This is our video
                 },
                 onremotestream: (stream) => {
-                    Janus.attachMediaStream(remote_video, stream);
+                    // Janus.attachMediaStream(remote_video_1, stream);
+                    // Janus.attachMediaStream(remote_video_2, stream);
                 },
                 oncleanup: () => {
                     // PeerConnection with the plugin closed, clean the UI
@@ -127,8 +144,8 @@ function component() {
     return element;
 }
 
-const sendTextMessage = (echotest, message) => {
-    echotest.data({
+const sendTextMessage = (videoroom_handle, message) => {
+    videoroom_handle.data({
         text: message,
         error: (reason) => {
             console.log("message not sent");
@@ -139,5 +156,116 @@ const sendTextMessage = (echotest, message) => {
         },
     });
 };
+
+const joinRoom = (handle) => {
+    console.log("Joining room");
+
+    var join_request = {
+        request: "join",
+        room: DEFAULT_ROOM,
+        ptype: "publisher",
+        display: USERNAME,
+    };
+
+    handle.send({ message: join_request });
+};
+
+const createRoom = (id, description) => {
+    // Create room
+    console.log("Creating room");
+
+    var create_room_request = {
+        request: "create",
+        room: id,
+        permanent: true,
+        description: description,
+    };
+
+    result = videoroom_handle.send({ message: create_room_request });
+};
+
+const joinAndConfigure = (handle) => {
+    console.log("Creating offer...")
+    handle.createOffer({
+        media: {
+            audioRecv: false,
+            videoRecv: false,
+            audioSend: true,
+            videoSend: true,
+            data: true,
+        },
+        sucess: (jsep) => {
+            console.log("Create offer with success")
+            var publish = {
+                request: "configure", // THIS SHOULD BE REPLACED BY joinandconfigure
+                audio: true,
+                video: true,
+            };
+
+            handle.send({ message: publish, jsep: jsep });
+        },
+        error: (error) => {
+            console.log("Error when creating offer");
+        },
+    });
+};
+
+const subscribe = (handle) => {
+    console.log("Subscribing...")
+    var subscribe = { 
+        "request": "join",
+        "room": DEFAULT_ROOM,
+        "ptype": "subscriber",
+        "feed": my_id,
+        "private_id": my_private_id 
+    };
+
+    handle.send({"message": subscribe});
+}
+
+const addNewPublisher = (publisher, video_component) => {
+
+    console.log("Adding a new publisher...");
+    console.log(`${JSON.stringify(publisher)}`);
+    
+    var remoteFeed = null;
+    
+    janus.attach({
+        plugin: "janus.plugin.videoroom",
+        success: (handle) => {
+            console.log("slave plugin handle success");
+
+            remoteFeed = handle;
+            subscribe(remoteFeed);
+        },
+        error: (error) => {
+            console.log("Error attaching slave plugin");
+        },
+        onmessage: (msg, jsep) => {
+            // To-do
+            console.log("debug log message!");
+
+            if (jsep !== undefined && jsep !== null) {
+                remoteFeed.createAnswer({
+                        jsep: jsep,
+                        media: { audioSend: false, videoSend: false, data: true },
+                        success: (jsep) => {
+                            console.log("Created answer with success")
+
+                            var body = { "request": "start", "room": DEFAULT_ROOM };
+                            remoteFeed.send({"message": body, "jsep": jsep});
+                        },
+                        error: (error) => {
+                            console.log("Error when answering offer");
+                        }
+                    });
+            }
+        },
+        onremotestream: (stream) => {
+            console.log("on remote stream...")
+            Janus.attachMediaStream(video_component, stream);
+        }
+    })
+}
 
 document.body.appendChild(component());

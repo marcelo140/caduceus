@@ -25,7 +25,6 @@ var echotest = null;
 function component() {
 
     const element = document.createElement("div");
-    element.innerHTML = _.join(["Hello", "85"], " ");
 
     const local_video = document.getElementById("local_video");
     const remote_video = document.getElementById("remote_video");

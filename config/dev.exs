@@ -16,9 +16,16 @@ config :caduceus, Caduceus.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :caduceus, CaduceusWeb.Endpoint,
-  http: [port: 4000],
+https: [
+      port: 4001,
+      cipher_suite: :strong,
+      keyfile: "priv/cert/selfsigned_key.pem",
+      certfile: "priv/cert/selfsigned.pem",
+         transport_options: [socket_opts: [:inet6]]
+    ],
   debug_errors: true,
   code_reloader: true,
+      force_ssl: [hsts: true],
   check_origin: false,
   watchers: [
     node: [
@@ -43,12 +50,6 @@ config :caduceus, CaduceusWeb.Endpoint,
 #
 # The `http:` config above can be replaced with:
 #
-#     https: [
-#       port: 4001,
-#       cipher_suite: :strong,
-#       keyfile: "priv/cert/selfsigned_key.pem",
-#       certfile: "priv/cert/selfsigned.pem"
-#     ],
 #
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on

@@ -16,7 +16,7 @@ var my_private_id;
 var janus = null;
 var videoroom_handle = null;
 
-var remote_streams = []
+var remote_streams = [];
 
 function component() {
     const element = document.createElement("div");
@@ -78,21 +78,19 @@ function component() {
                         my_id = msg["id"];
                         my_private_id = msg["private_id"];
 
-                        joinAndConfigure(videoroom_handle)
-                        
+                        joinAndConfigure(videoroom_handle);
                     }
-                    
-                    if (event_type === "joined" || event_type === "event"){
+
+                    if (event_type === "joined" || event_type === "event") {
                         if (publishers !== undefined && publishers !== null) {
-                            console.log("Publishers!!")
-    
-                            for(var publisher in publishers){
+                            console.log("Publishers!!");
+
+                            for (var publisher in publishers) {
                                 console.log(`${JSON.stringify(publisher)}`);
-    
-                                addNewPublisher(publisher, remote_video_1);
+                                addNewPublisher(publishers[publisher]["id"], remote_video_1);
                             }
                         }
-                    } 
+                    }
 
                     // Handle msg, if needed, and check jsep
                     if (jsep !== undefined && jsep !== null) {
@@ -173,7 +171,7 @@ const createRoom = (id, description) => {
 };
 
 const joinAndConfigure = (handle) => {
-    console.log("Creating offer...")
+    console.log("Creating offer...");
     handle.createOffer({
         media: {
             audioRecv: false,
@@ -182,8 +180,8 @@ const joinAndConfigure = (handle) => {
             videoSend: true,
             data: true,
         },
-        sucess: (jsep) => {
-            console.log("Create offer with success")
+        success: (jsep) => {
+            console.log("Create offer with success");
             var publish = {
                 request: "configure", // THIS SHOULD BE REPLACED BY joinandconfigure
                 audio: true,
@@ -198,33 +196,32 @@ const joinAndConfigure = (handle) => {
     });
 };
 
-const subscribe = (handle) => {
-    console.log("Subscribing...")
-    var subscribe = { 
-        "request": "join",
-        "room": DEFAULT_ROOM,
-        "ptype": "subscriber",
-        "feed": my_id,
-        "private_id": my_private_id 
+const subscribe = (handle, id) => {
+    console.log("Subscribing...");
+    var subscribe = {
+        request: "join",
+        room: DEFAULT_ROOM,
+        ptype: "subscriber",
+        feed: id,
+        private_id: my_private_id,
     };
 
-    handle.send({"message": subscribe});
-}
+    handle.send({ message: subscribe });
+};
 
-const addNewPublisher = (publisher, video_component) => {
-
+const addNewPublisher = (id, video_component) => {
     console.log("Adding a new publisher...");
-    console.log(`${JSON.stringify(publisher)}`);
-    
+    console.log(`${JSON.stringify(id)}`);
+
     var remoteFeed = null;
-    
+
     janus.attach({
         plugin: "janus.plugin.videoroom",
         success: (handle) => {
             console.log("slave plugin handle success");
 
             remoteFeed = handle;
-            subscribe(remoteFeed);
+            subscribe(remoteFeed, id);
         },
         error: (error) => {
             console.log("Error attaching slave plugin");
@@ -235,25 +232,25 @@ const addNewPublisher = (publisher, video_component) => {
 
             if (jsep !== undefined && jsep !== null) {
                 remoteFeed.createAnswer({
-                        jsep: jsep,
-                        media: { audioSend: false, videoSend: false, data: true },
-                        success: (jsep) => {
-                            console.log("Created answer with success")
+                    jsep: jsep,
+                    media: { audioSend: false, videoSend: false, data: true },
+                    success: (jsep) => {
+                        console.log("Created answer with success");
 
-                            var body = { "request": "start", "room": DEFAULT_ROOM };
-                            remoteFeed.send({"message": body, "jsep": jsep});
-                        },
-                        error: (error) => {
-                            console.log("Error when answering offer");
-                        }
-                    });
+                        var body = { request: "start", room: DEFAULT_ROOM };
+                        remoteFeed.send({ message: body, jsep: jsep });
+                    },
+                    error: (error) => {
+                        console.log("Error when answering offer");
+                    },
+                });
             }
         },
         onremotestream: (stream) => {
-            console.log("on remote stream...")
+            console.log("on remote stream...");
             Janus.attachMediaStream(video_component, stream);
-        }
-    })
-}
+        },
+    });
+};
 
 document.body.appendChild(component());

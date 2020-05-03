@@ -10,7 +10,7 @@ const DEFAULT_ROOM = 1234;
 const USERNAME = "dinis";
 const SERVER = "https://40.68.241.85:8089/janus";
 
-var my_private_id;
+// var my_private_id;
 
 var janus = null;
 var videoroom_handle = null;
@@ -78,8 +78,8 @@ window.start_call = function () {
                     if (event_type === "joined") {
                         console.log(`Joined room ${room}...`);
 
-                        my_id = msg["id"];
-                        my_private_id = msg["private_id"];
+                        // my_id = msg["id"];
+                        // my_private_id = msg["private_id"];
 
                         joinAndConfigure(videoroom_handle);
                     }

@@ -8,9 +8,8 @@ import { Janus } from "janus-gateway";
 
 const DEFAULT_ROOM = 1234;
 const USERNAME = "dinis";
-const SERVER = "https://192.168.1.226:8089/janus";
+const SERVER = "https://40.68.241.85:8089/janus";
 
-var my_id;
 var my_private_id;
 
 var janus = null;

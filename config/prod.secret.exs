@@ -20,6 +20,12 @@ config :caduceus, CaduceusWeb.Endpoint,
     port: String.to_integer(System.get_env("PORT") || "4000"),
     transport_options: [socket_opts: [:inet6]]
   ],
+  https: [
+    port: 4001,
+    cipher_suite: :strong,
+    keyfile: "priv/cert/selfsigned_key.pem",
+    certfile: "priv/cert/selfsigned.pem",
+  ],
   secret_key_base: secret_key_base
 
 # ## Using releases (Elixir v1.9+)

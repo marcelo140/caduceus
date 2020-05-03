@@ -9,6 +9,7 @@ services:
       - janus
     ports:
       - 4000:4000
+      - 4001:4001
     environment:
       JANUS_HOST: janus
       DATABASE_URL: ecto://postgres:postgres@postgres/caduceus

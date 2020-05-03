@@ -246,7 +246,7 @@ const addNewPublisher = (id) => {
         },
         onremotestream: (stream) => {
             console.log("on remote stream...");
-            if(document.getElementById(id).length == 0){
+            if(!document.getElementById(id)){
                 var video_component = addVideoToPage(id);
                 Janus.attachMediaStream(video_component, stream);
             }

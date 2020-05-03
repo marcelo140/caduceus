@@ -246,15 +246,18 @@ const addNewPublisher = (id) => {
         },
         onremotestream: (stream) => {
             console.log("on remote stream...");
-            var video_component = addVideoToPage(id);
-            Janus.attachMediaStream(video_component, stream);
+            if(document.getElementById(id).length == 0){
+                var video_component = addVideoToPage(id);
+                Janus.attachMediaStream(video_component, stream);
+            }
         },
     });
 };
 
 const addVideoToPage = (id) => {
+
     var video = document.createElement('video')
-    video.id = "remote_video_" + id
+    video.id = id
     video.width=315
     video.height=215
     video.autoplay=true

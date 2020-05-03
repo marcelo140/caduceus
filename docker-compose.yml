@@ -9,6 +9,7 @@ services:
       - janus
     ports:
       - 4000:4000
+      - 4001:4001
     environment:
       JANUS_HOST: janus
       DATABASE_URL: ecto://postgres:postgres@postgres/caduceus
@@ -27,6 +28,7 @@ services:
       - DOCKER_IP=${DOCKER_IP}
     volumes:
       - ${PWD}/janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg
+      - ${PWD}/janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg
       - ${PWD}/priv/cert:/cert
 
   postgres:

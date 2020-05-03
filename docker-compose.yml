@@ -23,6 +23,11 @@ services:
       - "8188:8188"
       - "8089:8089"
       - "10000-10200:10000-10200/udp"
+    environment:
+      - DOCKER_IP=${DOCKER_IP}
+    volumes:
+      - ${PWD}/janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg
+      - ${PWD}/priv/cert:/cert
 
   postgres:
     image: postgres

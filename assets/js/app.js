@@ -26,12 +26,8 @@ function component() {
 
 window.start_call = function () {
     const local_video = document.getElementById("local_video");
-    const remote_video_1 = document.getElementById("remote_video_1");
-    const remote_video_2 = document.getElementById("remote_video_2");
 
     console.log(local_video.id);
-    console.log(remote_video_1.id);
-    console.log(remote_video_2.id);
 
     Janus.init({
         debug: true,
@@ -91,7 +87,7 @@ window.start_call = function () {
 
                             for (var publisher in publishers) {
                                 console.log(`${JSON.stringify(publisher)}`);
-                                addNewPublisher(publishers[publisher]["id"], remote_video_1);
+                                addNewPublisher(publishers[publisher]["id"]);
                             }
                         }
                     }
@@ -212,7 +208,7 @@ const subscribe = (handle, id) => {
     handle.send({ message: subscribe });
 };
 
-const addNewPublisher = (id, video_component) => {
+const addNewPublisher = (id) => {
     console.log("Adding a new publisher...");
     console.log(`${JSON.stringify(id)}`);
 
@@ -251,9 +247,22 @@ const addNewPublisher = (id, video_component) => {
         },
         onremotestream: (stream) => {
             console.log("on remote stream...");
+            video_component = addVideoToPage()
             Janus.attachMediaStream(video_component, stream);
         },
     });
 };
+
+const addVideoToPage = () => {
+    video = document.createElement('video')
+    video.id = "remote_video_" + Math.floor(Math.random() * 1000).toString()
+    video.width=315
+    video.height=215
+    video.autoplay=true
+    video.playsinline=true
+    document.getElementById("video_section").appendChild(video)
+
+    return video
+}
 
 document.body.appendChild(component());

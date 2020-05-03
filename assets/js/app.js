@@ -253,7 +253,7 @@ const addNewPublisher = (id) => {
 };
 
 const addVideoToPage = () => {
-    video = document.createElement('video')
+    var video = document.createElement('video')
     video.id = "remote_video_" + Math.floor(Math.random() * 1000).toString()
     video.width=315
     video.height=215

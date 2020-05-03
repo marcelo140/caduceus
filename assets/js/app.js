@@ -205,7 +205,7 @@ const subscribe = (handle, id) => {
         room: DEFAULT_ROOM,
         ptype: "subscriber",
         feed: id,
-        private_id: my_private_id,
+        // private_id: my_private_id,
     };
 
     handle.send({ message: subscribe });

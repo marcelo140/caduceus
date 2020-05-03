@@ -21,6 +21,10 @@ var remote_streams = [];
 function component() {
     const element = document.createElement("div");
 
+    return element;
+}
+
+window.start_call = function () {
     const local_video = document.getElementById("local_video");
     const remote_video_1 = document.getElementById("remote_video_1");
     const remote_video_2 = document.getElementById("remote_video_2");
@@ -126,8 +130,6 @@ function component() {
             console.log("destroyed");
         },
     });
-
-    return element;
 }
 
 const sendTextMessage = (videoroom_handle, message) => {

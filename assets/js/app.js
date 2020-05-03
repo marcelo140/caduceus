@@ -258,8 +258,8 @@ const addVideoToPage = (id) => {
 
     var video = document.createElement('video')
     video.id = id
-    video.width=315
-    video.height=215
+    video.width=320
+    video.height=240
     video.autoplay=true
     video.playsinline=true
     document.getElementById("video_section").appendChild(video)
